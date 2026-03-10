@@ -98,51 +98,6 @@ font-size:22px;
 </div>
 
 <script>
-const EXAM_STORAGE_KEY = "pcep_exam_state"
-const EXAM_EXPIRE_HOURS = 48
-
-function saveExamState(){
-
-const data={
-questions,
-current,
-score,
-answers,
-time,
-leaveAttempts,
-savedAt:Date.now()
-}
-
-localStorage.setItem(EXAM_STORAGE_KEY,JSON.stringify(data))
-
-}
-
-function loadExamState(){
-
-const raw=localStorage.getItem(EXAM_STORAGE_KEY)
-
-if(!raw)return false
-
-const data=JSON.parse(raw)
-
-const hoursPassed=(Date.now()-data.savedAt)/(1000*60*60)
-
-if(hoursPassed>EXAM_EXPIRE_HOURS){
-localStorage.removeItem(EXAM_STORAGE_KEY)
-return false
-}
-
-questions=data.questions
-current=data.current
-score=data.score
-answers=data.answers
-time=data.time
-leaveAttempts=data.leaveAttempts
-
-return true
-
-}
-
 const questionPool = [
 
 {q:"Mi a kimenet? print(2+2)",o:["3","4","5","6"],a:1},
@@ -155,210 +110,144 @@ const questionPool = [
 {q:"Mi a kimenet? print(7%3)",o:["1","2","3","0"],a:0},
 {q:"Mi a kimenet? print(bool(0))",o:["True","False","0","hiba"],a:1},
 {q:"Mi a kimenet? print('Hello'+'World')",o:["Hello World","HelloWorld","Hello+World","hiba"],a:1},
-
 {q:"Mi a kimenet? x=[1,2,3]; print(len(x))",o:["2","3","1","hiba"],a:1},
 {q:"Mi a kimenet? print(max(3,7,2))",o:["2","3","7","hiba"],a:2},
 {q:"Mi a kimenet? print(abs(-5))",o:["-5","5","0","hiba"],a:1},
 {q:"Mi a kimenet? print(5>3)",o:["True","False","5","3"],a:0},
 {q:"Mi a kimenet? print(type(3.14))",o:["int","float","str","bool"],a:1},
-
 {q:"Mi a kimenet? print('abc'*3)",o:["abcabcabc","abc3","abc abc abc","hiba"],a:0},
 {q:"Mi a kimenet? x=[1,2,3]; x.append(4); print(x)",o:["[1,2,3]","[4]","[1,2,3,4]","hiba"],a:2},
 {q:"Mi a kimenet? print('python'[0])",o:["p","y","python","hiba"],a:0},
 {q:"Mi a kimenet? for i in range(3): print(i)",o:["1 2 3","0 1 2","0 1 2 3","1 2"],a:1},
 {q:"Mi a kimenet? for i in range(2,5): print(i)",o:["2 3 4","2 3 4 5","3 4 5","2 4"],a:0},
-
 {q:"Mi a kimenet? print(round(3.6))",o:["3","4","3.6","hiba"],a:1},
 {q:"Mi a kimenet? print(min(5,2,8))",o:["2","5","8","hiba"],a:0},
 {q:"Mi a kimenet? print(int('5')+2)",o:["7","52","hiba","5"],a:0},
 {q:"Mi a kimenet? print(10>5 and 5>2)",o:["True","False","10","hiba"],a:0},
 {q:"Mi a kimenet? print(len([1,2,3,4]))",o:["3","4","5","hiba"],a:1},
-
 {q:"Mi a kimenet? x=5; x+=3; print(x)",o:["5","8","3","15"],a:1},
 {q:"Mi a kimenet? print(9//2)",o:["4","4.5","5","3"],a:0},
 {q:"Mi a kimenet? print(3*'Hi')",o:["HiHiHi","Hi3","Hi Hi Hi","hiba"],a:0},
 {q:"Mi a kimenet? print(bool(1))",o:["True","False","1","hiba"],a:0},
 {q:"Mi a kimenet? print(len('AI'))",o:["1","2","3","hiba"],a:1},
-
 {q:"Mi a kimenet? print(max([1,5,2]))",o:["1","2","5","hiba"],a:2},
 {q:"Mi a kimenet? print(min([3,7,1]))",o:["1","3","7","hiba"],a:0},
 {q:"Mi a kimenet? print(sum([1,2,3]))",o:["3","6","5","hiba"],a:1},
 {q:"Mi a kimenet? print('A'.lower())",o:["a","A","hiba","aa"],a:0},
 {q:"Mi a kimenet? print('python'.upper())",o:["PYTHON","python","Python","hiba"],a:0},
-
 {q:"Mi a kimenet? print(4%2)",o:["0","1","2","hiba"],a:0},
 {q:"Mi a kimenet? print(5**2)",o:["10","25","15","20"],a:1},
 {q:"Mi a kimenet? print(8/2)",o:["4","4.0","2","hiba"],a:1},
 {q:"Mi a kimenet? print(6>8)",o:["True","False","6","hiba"],a:1},
 {q:"Mi a kimenet? print(len('ChatGPT'))",o:["6","7","8","9"],a:1},
-
 {q:"Mi a kimenet? print(10%4)",o:["2","3","4","1"],a:0},
 {q:"Mi a kimenet? print(3+3*2)",o:["12","9","6","10"],a:1},
 {q:"Mi a kimenet? print(15//4)",o:["3","3.75","4","2"],a:0},
 {q:"Mi a kimenet? print(2+3*4)",o:["14","20","24","10"],a:0},
 {q:"Mi a kimenet? print(len('Code'))",o:["3","4","5","6"],a:1},
-
 {q:"Mi a kimenet? print(100>50)",o:["True","False","100","50"],a:0},
 {q:"Mi a kimenet? print(bool('Python'))",o:["True","False","0","hiba"],a:0},
 {q:"Mi a kimenet? print('AI'+'Bot')",o:["AIBot","AI Bot","AI+Bot","hiba"],a:0},
 {q:"Mi a kimenet? print(20//6)",o:["3","3.3","4","2"],a:0},
 {q:"Mi a kimenet? print(9%5)",o:["4","5","3","1"],a:0},
-
 {q:"Mi a kimenet? print(4*4)",o:["8","16","12","4"],a:1},
 {q:"Mi a kimenet? print(3+7)",o:["9","10","11","12"],a:1},
 {q:"Mi a kimenet? print(12//5)",o:["2","2.4","3","1"],a:0},
 {q:"Mi a kimenet? print(6%4)",o:["1","2","3","0"],a:1},
 {q:"Mi a kimenet? print(8>3)",o:["True","False","8","3"],a:0},
 {q:"Mi a kimenet? x=0; for i in range(5): x+=i; print(x)",o:["10","15","5","0"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; x.append(x[-1]); print(x)",o:["[1,2,3]","[1,2,3,3]","[1,2,3,1]","hiba"],a:1},
-
 {q:"Mi a kimenet? x=5; while x>2: x-=1; print(x)",o:["5","2","3","4"],a:1},
-
 {q:"Mi a kimenet? print(sum([1,2,3,4]))",o:["10","9","8","6"],a:0},
-
 {q:"Mi a kimenet? nums=[1,2,3]; print(nums[-1])",o:["1","2","3","hiba"],a:2},
-
 {q:"Mi a kimenet? x=1; for i in range(3): x*=2; print(x)",o:["4","6","8","2"],a:2},
-
 {q:"Mi a kimenet? text='python'; print(text[0:2])",o:["py","yt","th","on"],a:0},
-
 {q:"Mi a kimenet? for i in range(1,4): print(i*2)",o:["2 4 6","1 2 3","2 3 4","4 6 8"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; x[0]=10; print(x)",o:["[10,2,3]","[1,10,3]","[1,2,10]","hiba"],a:0},
-
 {q:"Mi a kimenet? print(len([1,2,[3,4]]))",o:["2","3","4","5"],a:1},
-
 {q:"Mi a kimenet? x=0; for i in range(4): if i%2==0: x+=i; print(x)",o:["4","6","2","3"],a:0},
-
 {q:"Mi a kimenet? print('abc'.upper())",o:["ABC","abc","Abc","hiba"],a:0},
-
 {q:"Mi a kimenet? print(list(range(3)))",o:["[0,1,2]","[1,2,3]","[0,1,2,3]","[1,2]"],a:0},
-
 {q:"Mi a kimenet? nums=[5,3,8]; nums.sort(); print(nums)",o:["[5,3,8]","[3,5,8]","[8,5,3]","hiba"],a:1},
-
 {q:"Mi a kimenet? print(bool([]))",o:["True","False","[]","hiba"],a:1},
-
 {q:"Mi a kimenet? x=2; x*=3+1; print(x)",o:["8","6","12","4"],a:0},
-
 {q:"Mi a kimenet? print(3 in [1,2,3,4])",o:["True","False","3","hiba"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; x.pop(); print(x)",o:["[1,2]","[2,3]","[1,2,3]","[3]"],a:0},
-
 {q:"Mi a kimenet? text='AI'; print(text*2)",o:["AIAI","AI AI","AI2","hiba"],a:0},
-
 {q:"Mi a kimenet? x=10; if x>5: print('A'); else: print('B')",o:["A","B","semmi","hiba"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; x.append(len(x)); print(x)",o:["[1,2,3,3]","[1,2,3,4]","[1,2,3,2]","hiba"],a:0},
-
 {q:"Mi a kimenet? x=3; for i in range(2): x+=i; print(x)",o:["3","4","5","6"],a:1},
-
 {q:"Mi a kimenet? x=[1,2]; x=x*2; print(x)",o:["[1,2,1,2]","[2,4]","[1,2,2]","hiba"],a:0},
-
 {q:"Mi a kimenet? x='abc'; print(x[::-1])",o:["abc","cba","bac","hiba"],a:1},
-
 {q:"Mi a kimenet? x=0; for i in range(1,4): x+=i*i; print(x)",o:["14","10","9","6"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; print(x[1:])",o:["[1,2]","[2,3]","[3]","hiba"],a:1},
-
 {q:"Mi a kimenet? x=1; while x<8: x*=2; print(x)",o:["8","4","16","2"],a:0},
-
 {q:"Mi a kimenet? print(len('python'[1:4]))",o:["2","3","4","5"],a:1},
-
 {q:"Mi a kimenet? x=[3,1,2]; print(sorted(x))",o:["[3,1,2]","[1,2,3]","[2,3,1]","hiba"],a:1},
-
 {q:"Mi a kimenet? x=5; if x%2: print('A')",o:["A","B","0","hiba"],a:0},
-
 {q:"Mi a kimenet? print([i for i in range(3)])",o:["[0,1,2]","[1,2,3]","[0,1,2,3]","hiba"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; print(x.count(2))",o:["0","1","2","3"],a:1},
-
 {q:"Mi a kimenet? print('Python'.startswith('Py'))",o:["True","False","hiba","None"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; x.insert(1,5); print(x)",o:["[1,5,2,3]","[5,1,2,3]","[1,2,3,5]","hiba"],a:0},
-
 {q:"Mi a kimenet? print(min([5,4,7,1]))",o:["5","4","7","1"],a:3},
-
 {q:"Mi a kimenet? x='abcd'; print(x[-2])",o:["c","b","d","a"],a:0},
-
 {q:"Mi a kimenet? print(list(range(1,6,2)))",o:["[1,3,5]","[1,2,3]","[1,3]","[2,4]"],a:0},
-
 {q:"Mi a kimenet? x=0; for i in range(3): for j in range(2): x+=1; print(x)",o:["3","4","5","6"],a:3},
-
 {q:"Mi a kimenet? print(any([0,0,1,0]))",o:["True","False","1","hiba"],a:0},
-
 {q:"Mi a kimenet? print(all([1,2,0]))",o:["True","False","1","0"],a:1},
-
 {q:"Mi a kimenet? x=[1,2,3]; print(sum(x)/len(x))",o:["2","2.0","1","3"],a:1},
-
 {q:"Mi a kimenet? print('ab'*2+'c')",o:["ababc","abab","abc","hiba"],a:0},
-
 {q:"Mi a kimenet? x=[2,4,6]; print(max(x)-min(x))",o:["4","2","6","8"],a:0},
-
 {q:"Mi a kimenet? print(3<5<7)",o:["True","False","hiba","None"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; x.remove(2); print(x)",o:["[1,3]","[2,3]","[1,2]","hiba"],a:0},
-
 {q:"Mi a kimenet? print(bool(''))",o:["True","False","''","hiba"],a:1},
-
 {q:"Mi a kimenet? x=[1,2,3]; print(x[::-2])",o:["[3,1]","[1,3]","[3,2]","hiba"],a:0},
-
 {q:"Mi a kimenet? print(len(set([1,1,2,3])))",o:["2","3","4","1"],a:1},
-
 {q:"Mi a kimenet? x=4; print(x%3==1)",o:["True","False","1","0"],a:0},
-
 {q:"Mi a kimenet? x=[1,2,3]; y=x; y.append(4); print(x)",o:["[1,2,3]","[1,2,3,4]","[4]","hiba"],a:1},
 {q:"Mi a kimenet? print(3+4*2)",o:["14","11","10","7"],a:1},
 {q:"Mi a kimenet? print(10/2)",o:["5","5.0","2","10"],a:1},
 {q:"Mi a kimenet? print(10%3)",o:["1","2","3","0"],a:1},
 {q:"Mi a kimenet? print(2**4)",o:["6","8","16","12"],a:2},
 {q:"Mi a típusa: x=5",o:["int","float","str","bool"],a:0},
-
 {q:"Mi a kimenet? print(bool(5))",o:["True","False","5","hiba"],a:0},
 {q:"Mi a kimenet? print(len('Code'))",o:["3","4","5","6"],a:1},
 {q:"Mi a kimenet? print('A'+'B')",o:["AB","A B","A+B","hiba"],a:0},
 {q:"Mi a kimenet? print(7//2)",o:["3","3.5","4","2"],a:0},
 {q:"Mi a kimenet? print(5==5)",o:["True","False","5","hiba"],a:0},
-
 {q:"Mi a kimenet? print(6!=3)",o:["True","False","6","hiba"],a:0},
 {q:"Mi a kimenet? print(2<5)",o:["True","False","2","5"],a:0},
 {q:"Mi a kimenet? print(len([1,2,3]))",o:["2","3","4","hiba"],a:1},
 {q:"Mi a kimenet? print(max([4,1,7]))",o:["4","7","1","hiba"],a:1},
 {q:"Mi a kimenet? print(min([4,1,7]))",o:["4","7","1","hiba"],a:2},
-
 {q:"Mi a kimenet? print(sum([2,3]))",o:["5","6","23","hiba"],a:0},
 {q:"Mi a kimenet? print('hi'*2)",o:["hihi","hi hi","hi2","hiba"],a:0},
 {q:"Mi a kimenet? print(len('AI'))",o:["1","2","3","hiba"],a:1},
 {q:"Mi a kimenet? print('python'.upper())",o:["PYTHON","Python","python","hiba"],a:0},
 {q:"Mi a kimenet? print('PY'.lower())",o:["py","PY","Py","hiba"],a:0},
-
 {q:"Mi a kimenet? x=[1,2]; x.append(3); print(len(x))",o:["2","3","1","hiba"],a:1},
 {q:"Mi a kimenet? print(list(range(2)))",o:["[0,1]","[1,2]","[0,1,2]","[2]"],a:0},
 {q:"Mi a kimenet? print(list(range(1,4)))",o:["[1,2,3]","[0,1,2]","[1,2,3,4]","[2,3,4]"],a:0},
 {q:"Mi a kimenet? for i in range(2): print(i)",o:["0 1","1 2","0 1 2","2 3"],a:0},
 {q:"Mi a kimenet? print(4>2 and 1<3)",o:["True","False","4","hiba"],a:0},
-
 {q:"Mi a kimenet? print(not False)",o:["True","False","0","hiba"],a:0},
 {q:"Mi a kimenet? print(True or False)",o:["True","False","0","hiba"],a:0},
 {q:"Mi a kimenet? print(bool([]))",o:["True","False","[]","hiba"],a:1},
 {q:"Mi a kimenet? print(bool([1]))",o:["True","False","1","hiba"],a:0},
 {q:"Mi a kimenet? print(len({1,2,3}))",o:["2","3","4","hiba"],a:1},
-
 {q:"Mi a kimenet? print(2+2*2)",o:["8","6","4","10"],a:1},
 {q:"Mi a kimenet? print(9//4)",o:["2","2.25","3","1"],a:0},
 {q:"Mi a kimenet? print(9/4)",o:["2","2.25","3","1"],a:1},
 {q:"Mi a kimenet? print(abs(-10))",o:["-10","10","0","hiba"],a:1},
 {q:"Mi a kimenet? print(round(4.4))",o:["4","5","4.4","hiba"],a:0},
-
 {q:"Mi a kimenet? x=[3,1,2]; x.sort(); print(x)",o:["[1,2,3]","[3,1,2]","[2,3,1]","hiba"],a:0},
 {q:"Mi a kimenet? x=[1,2,3]; print(x[0])",o:["1","2","3","hiba"],a:0},
 {q:"Mi a kimenet? x='Python'; print(x[1])",o:["P","y","t","o"],a:1},
 {q:"Mi a kimenet? x='abc'; print(len(x))",o:["2","3","4","1"],a:1},
 {q:"Mi a kimenet? print(type(True))",o:["bool","int","str","float"],a:0}
-
 ]
 
-let questions = []
+let questions = questionPool.sort(()=>Math.random()-0.5).slice(0,30)
 let current=0
 let score=0
 let selected=null
@@ -404,6 +293,11 @@ function selectOption(i){
 
 function nextQuestion(){
 
+    if(selected===null){
+    alert("Válassz egy választ mielőtt továbblépsz!")
+    return
+    }
+
     answers[current]=selected
 
     if(selected===questions[current].a){
@@ -418,7 +312,6 @@ function nextQuestion(){
     }
 
     loadQuestion()
-    saveExamState()
 
 }
 
@@ -513,7 +406,6 @@ showReview()
     document.getElementById("timer").innerText="Idő: "+m+":"+(s<10?"0":"")+s
 
     time--
-    saveExamState()
 
     if(time<=0){
 
@@ -547,7 +439,6 @@ finishTest()
 }
 
 })
-saveExamState()
 </script>
 
 </body>
