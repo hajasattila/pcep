@@ -98,6 +98,50 @@ font-size:22px;
 </div>
 
 <script>
+const EXAM_STORAGE_KEY = "pcep_exam_state"
+const EXAM_EXPIRE_HOURS = 48
+
+function saveExamState(){
+
+const data={
+questions,
+current,
+score,
+answers,
+time,
+leaveAttempts,
+savedAt:Date.now()
+}
+
+localStorage.setItem(EXAM_STORAGE_KEY,JSON.stringify(data))
+
+}
+
+function loadExamState(){
+
+const raw=localStorage.getItem(EXAM_STORAGE_KEY)
+
+if(!raw)return false
+
+const data=JSON.parse(raw)
+
+const hoursPassed=(Date.now()-data.savedAt)/(1000*60*60)
+
+if(hoursPassed>EXAM_EXPIRE_HOURS){
+localStorage.removeItem(EXAM_STORAGE_KEY)
+return false
+}
+
+questions=data.questions
+current=data.current
+score=data.score
+answers=data.answers
+time=data.time
+leaveAttempts=data.leaveAttempts
+
+return true
+
+}
 
 const questionPool = [
 
@@ -203,15 +247,128 @@ const questionPool = [
 
 {q:"Mi a kimenet? text='AI'; print(text*2)",o:["AIAI","AI AI","AI2","hiba"],a:0},
 
-{q:"Mi a kimenet? x=10; if x>5: print('A'); else: print('B')",o:["A","B","semmi","hiba"],a:0}
+{q:"Mi a kimenet? x=10; if x>5: print('A'); else: print('B')",o:["A","B","semmi","hiba"],a:0},
+
+{q:"Mi a kimenet? x=[1,2,3]; x.append(len(x)); print(x)",o:["[1,2,3,3]","[1,2,3,4]","[1,2,3,2]","hiba"],a:0},
+
+{q:"Mi a kimenet? x=3; for i in range(2): x+=i; print(x)",o:["3","4","5","6"],a:1},
+
+{q:"Mi a kimenet? x=[1,2]; x=x*2; print(x)",o:["[1,2,1,2]","[2,4]","[1,2,2]","hiba"],a:0},
+
+{q:"Mi a kimenet? x='abc'; print(x[::-1])",o:["abc","cba","bac","hiba"],a:1},
+
+{q:"Mi a kimenet? x=0; for i in range(1,4): x+=i*i; print(x)",o:["14","10","9","6"],a:0},
+
+{q:"Mi a kimenet? x=[1,2,3]; print(x[1:])",o:["[1,2]","[2,3]","[3]","hiba"],a:1},
+
+{q:"Mi a kimenet? x=1; while x<8: x*=2; print(x)",o:["8","4","16","2"],a:0},
+
+{q:"Mi a kimenet? print(len('python'[1:4]))",o:["2","3","4","5"],a:1},
+
+{q:"Mi a kimenet? x=[3,1,2]; print(sorted(x))",o:["[3,1,2]","[1,2,3]","[2,3,1]","hiba"],a:1},
+
+{q:"Mi a kimenet? x=5; if x%2: print('A')",o:["A","B","0","hiba"],a:0},
+
+{q:"Mi a kimenet? print([i for i in range(3)])",o:["[0,1,2]","[1,2,3]","[0,1,2,3]","hiba"],a:0},
+
+{q:"Mi a kimenet? x=[1,2,3]; print(x.count(2))",o:["0","1","2","3"],a:1},
+
+{q:"Mi a kimenet? print('Python'.startswith('Py'))",o:["True","False","hiba","None"],a:0},
+
+{q:"Mi a kimenet? x=[1,2,3]; x.insert(1,5); print(x)",o:["[1,5,2,3]","[5,1,2,3]","[1,2,3,5]","hiba"],a:0},
+
+{q:"Mi a kimenet? print(min([5,4,7,1]))",o:["5","4","7","1"],a:3},
+
+{q:"Mi a kimenet? x='abcd'; print(x[-2])",o:["c","b","d","a"],a:0},
+
+{q:"Mi a kimenet? print(list(range(1,6,2)))",o:["[1,3,5]","[1,2,3]","[1,3]","[2,4]"],a:0},
+
+{q:"Mi a kimenet? x=0; for i in range(3): for j in range(2): x+=1; print(x)",o:["3","4","5","6"],a:3},
+
+{q:"Mi a kimenet? print(any([0,0,1,0]))",o:["True","False","1","hiba"],a:0},
+
+{q:"Mi a kimenet? print(all([1,2,0]))",o:["True","False","1","0"],a:1},
+
+{q:"Mi a kimenet? x=[1,2,3]; print(sum(x)/len(x))",o:["2","2.0","1","3"],a:1},
+
+{q:"Mi a kimenet? print('ab'*2+'c')",o:["ababc","abab","abc","hiba"],a:0},
+
+{q:"Mi a kimenet? x=[2,4,6]; print(max(x)-min(x))",o:["4","2","6","8"],a:0},
+
+{q:"Mi a kimenet? print(3<5<7)",o:["True","False","hiba","None"],a:0},
+
+{q:"Mi a kimenet? x=[1,2,3]; x.remove(2); print(x)",o:["[1,3]","[2,3]","[1,2]","hiba"],a:0},
+
+{q:"Mi a kimenet? print(bool(''))",o:["True","False","''","hiba"],a:1},
+
+{q:"Mi a kimenet? x=[1,2,3]; print(x[::-2])",o:["[3,1]","[1,3]","[3,2]","hiba"],a:0},
+
+{q:"Mi a kimenet? print(len(set([1,1,2,3])))",o:["2","3","4","1"],a:1},
+
+{q:"Mi a kimenet? x=4; print(x%3==1)",o:["True","False","1","0"],a:0},
+
+{q:"Mi a kimenet? x=[1,2,3]; y=x; y.append(4); print(x)",o:["[1,2,3]","[1,2,3,4]","[4]","hiba"],a:1},
+{q:"Mi a kimenet? print(3+4*2)",o:["14","11","10","7"],a:1},
+{q:"Mi a kimenet? print(10/2)",o:["5","5.0","2","10"],a:1},
+{q:"Mi a kimenet? print(10%3)",o:["1","2","3","0"],a:1},
+{q:"Mi a kimenet? print(2**4)",o:["6","8","16","12"],a:2},
+{q:"Mi a típusa: x=5",o:["int","float","str","bool"],a:0},
+
+{q:"Mi a kimenet? print(bool(5))",o:["True","False","5","hiba"],a:0},
+{q:"Mi a kimenet? print(len('Code'))",o:["3","4","5","6"],a:1},
+{q:"Mi a kimenet? print('A'+'B')",o:["AB","A B","A+B","hiba"],a:0},
+{q:"Mi a kimenet? print(7//2)",o:["3","3.5","4","2"],a:0},
+{q:"Mi a kimenet? print(5==5)",o:["True","False","5","hiba"],a:0},
+
+{q:"Mi a kimenet? print(6!=3)",o:["True","False","6","hiba"],a:0},
+{q:"Mi a kimenet? print(2<5)",o:["True","False","2","5"],a:0},
+{q:"Mi a kimenet? print(len([1,2,3]))",o:["2","3","4","hiba"],a:1},
+{q:"Mi a kimenet? print(max([4,1,7]))",o:["4","7","1","hiba"],a:1},
+{q:"Mi a kimenet? print(min([4,1,7]))",o:["4","7","1","hiba"],a:2},
+
+{q:"Mi a kimenet? print(sum([2,3]))",o:["5","6","23","hiba"],a:0},
+{q:"Mi a kimenet? print('hi'*2)",o:["hihi","hi hi","hi2","hiba"],a:0},
+{q:"Mi a kimenet? print(len('AI'))",o:["1","2","3","hiba"],a:1},
+{q:"Mi a kimenet? print('python'.upper())",o:["PYTHON","Python","python","hiba"],a:0},
+{q:"Mi a kimenet? print('PY'.lower())",o:["py","PY","Py","hiba"],a:0},
+
+{q:"Mi a kimenet? x=[1,2]; x.append(3); print(len(x))",o:["2","3","1","hiba"],a:1},
+{q:"Mi a kimenet? print(list(range(2)))",o:["[0,1]","[1,2]","[0,1,2]","[2]"],a:0},
+{q:"Mi a kimenet? print(list(range(1,4)))",o:["[1,2,3]","[0,1,2]","[1,2,3,4]","[2,3,4]"],a:0},
+{q:"Mi a kimenet? for i in range(2): print(i)",o:["0 1","1 2","0 1 2","2 3"],a:0},
+{q:"Mi a kimenet? print(4>2 and 1<3)",o:["True","False","4","hiba"],a:0},
+
+{q:"Mi a kimenet? print(not False)",o:["True","False","0","hiba"],a:0},
+{q:"Mi a kimenet? print(True or False)",o:["True","False","0","hiba"],a:0},
+{q:"Mi a kimenet? print(bool([]))",o:["True","False","[]","hiba"],a:1},
+{q:"Mi a kimenet? print(bool([1]))",o:["True","False","1","hiba"],a:0},
+{q:"Mi a kimenet? print(len({1,2,3}))",o:["2","3","4","hiba"],a:1},
+
+{q:"Mi a kimenet? print(2+2*2)",o:["8","6","4","10"],a:1},
+{q:"Mi a kimenet? print(9//4)",o:["2","2.25","3","1"],a:0},
+{q:"Mi a kimenet? print(9/4)",o:["2","2.25","3","1"],a:1},
+{q:"Mi a kimenet? print(abs(-10))",o:["-10","10","0","hiba"],a:1},
+{q:"Mi a kimenet? print(round(4.4))",o:["4","5","4.4","hiba"],a:0},
+
+{q:"Mi a kimenet? x=[3,1,2]; x.sort(); print(x)",o:["[1,2,3]","[3,1,2]","[2,3,1]","hiba"],a:0},
+{q:"Mi a kimenet? x=[1,2,3]; print(x[0])",o:["1","2","3","hiba"],a:0},
+{q:"Mi a kimenet? x='Python'; print(x[1])",o:["P","y","t","o"],a:1},
+{q:"Mi a kimenet? x='abc'; print(len(x))",o:["2","3","4","1"],a:1},
+{q:"Mi a kimenet? print(type(True))",o:["bool","int","str","float"],a:0}
 
 ]
 
-let questions = questionPool.sort(()=>Math.random()-0.5).slice(0,30)
-
+let questions = []
 let current=0
 let score=0
 let selected=null
+let answers=[]
+let time=45*60
+let leaveAttempts=3
+
+if(!loadExamState()){
+questions = questionPool.sort(()=>Math.random()-0.5).slice(0,30)
+}
 
 function loadQuestion(){
 
@@ -235,78 +392,162 @@ selected=null
 
 function selectOption(i){
 
-selected=i
+    selected=i
 
-let opts=document.querySelectorAll(".option")
+    let opts=document.querySelectorAll(".option")
 
-opts.forEach(o=>o.classList.remove("selected"))
+    opts.forEach(o=>o.classList.remove("selected"))
 
-opts[i].classList.add("selected")
+    opts[i].classList.add("selected")
 
 }
 
 function nextQuestion(){
 
-if(selected===questions[current].a) score++
+    answers[current]=selected
 
-current++
+    if(selected===questions[current].a){
+    score++
+    }
 
-if(current>=questions.length){
+    current++
 
-document.getElementById("quiz").style.display="none"
+    if(current>=questions.length){
+    finishTest()
+    return
+    }
 
-document.getElementById("result").style.display="block"
+    loadQuestion()
+    saveExamState()
 
-let percent = Math.round((score/questions.length)*100)
+}
 
-let status = percent >= 70 ? "SIKERES ✅" : "SIKERTELEN ❌"
+function finishTest(){
 
-document.getElementById("result").innerHTML=
-"Eredmény: "+score+" / "+questions.length+
-"<br><br>Százalék: "+percent+"%"+
-"<br><br>Vizsga: "+status
+    clearInterval(timer)
+
+    document.getElementById("timer").style.display="none"
+
+    let percent=Math.round((score/questions.length)*100)
+
+    let status=percent>=70?"SIKERES ✅":"SIKERTELEN ❌"
+
+    document.getElementById("quiz").style.display="none"
+    document.getElementById("result").style.display="block"
+
+    document.getElementById("result").innerHTML=
+    "Eredmény: "+score+" / "+questions.length+
+    "<br><br>Százalék: "+percent+"%"+
+    "<br><br>Vizsga: "+status+
+    "<br><br><button onclick='startReview()'>Kérdések áttekintése</button>"
+
+    }
+
+    let reviewIndex=0
+
+    function startReview(){
+
+    document.getElementById("result").style.display="none"
+    document.getElementById("quiz").style.display="block"
+
+    reviewIndex=0
+
+    showReview()
+
+}
+
+function showReview(){
+
+let q=questions[reviewIndex]
+
+document.getElementById("question").innerText=(reviewIndex+1)+". "+q.q
+
+let html=""
+
+for(let i=0;i<q.o.length;i++){
+
+let style=""
+
+if(i===q.a){
+style="background:#22c55e;color:black"
+}
+
+if(i===answers[reviewIndex] && i!==q.a){
+style="background:#ef4444"
+}
+
+html+=`<div class="option" style="${style}">${q.o[i]}</div>`
+
+}
+
+html+=`<button onclick="nextReview()">Következő kérdés</button>`
+
+document.getElementById("options").innerHTML=html
+
+}
+
+function nextReview(){
+
+reviewIndex++
+
+if(reviewIndex>=questions.length){
+
+document.getElementById("question").innerText="Áttekintés vége"
+document.getElementById("options").innerHTML=""
 
 return
 }
 
-loadQuestion()
+showReview()
 
 }
 
-loadQuestion()
+    loadQuestion()
 
-let time=45*60
 
-let timer=setInterval(()=>{
+    let timer=setInterval(()=>{
 
-let m=Math.floor(time/60)
-let s=time%60
+    let m=Math.floor(time/60)
+    let s=time%60
 
-document.getElementById("timer").innerText="Idő: "+m+":"+(s<10?"0":"")+s
+    document.getElementById("timer").innerText="Idő: "+m+":"+(s<10?"0":"")+s
 
-time--
+    time--
+    saveExamState()
 
-if(time<=0){
+    if(time<=0){
 
-clearInterval(timer)
+    clearInterval(timer)
 
-document.getElementById("quiz").style.display="none"
+    finishTest()
 
-document.getElementById("result").style.display="block"
-
-let percent = Math.round((score/questions.length)*100)
-
-let status = percent >= 70 ? "SIKERES ✅" : "SIKERTELEN ❌"
-
-document.getElementById("result").innerHTML=
-"Lejárt az idő!<br><br>"+
-"Eredmény: "+score+" / "+questions.length+
-"<br><br>Százalék: "+percent+"%"+
-"<br><br>Vizsga: "+status
-}
+    }
 
 },1000)
 
+
+document.addEventListener("visibilitychange", () => {
+
+if(document.hidden){
+
+leaveAttempts--
+
+if(leaveAttempts > 0){
+
+alert("FIGYELEM!\nMég " + leaveAttempts + " lehetőséged van, vagy vége a vizsgának!")
+
+}else{
+
+alert("A vizsga véget ért, mert túl sokszor elhagytad az oldalt.")
+
+finishTest()
+
+}
+
+}
+
+})
+saveExamState()
 </script>
 
 </body>
